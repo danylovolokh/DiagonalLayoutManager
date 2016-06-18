@@ -1,21 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_view"
+    android:layout_width="200dp"
+    android:layout_height="100dp"
+    card_view:cardCornerRadius="4dp">
 
-
-    <android.support.v7.widget.CardView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/card_view"
-        card_view:cardCornerRadius="4dp"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginBottom="2.5dp"
-        android:layout_marginTop="2.5dp">
+        android:layout_height="match_parent"
+        android:padding="2dp"
+        >
+
+        <ImageView
+            android:layout_gravity="center_vertical"
+            android:id="@+id/avatar"
+            android:scaleType="centerCrop"
+            android:layout_width="98dp"
+            android:layout_height="98dp" />
 
         <TextView
-            android:id="@+id/item_sample_text"
+            android:id="@+id/quote"
+            android:layout_gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:background="@android:color/holo_green_light"/>
-    </android.support.v7.widget.CardView>
+            android:gravity="center" />
+
+    </LinearLayout>
+
+
+</android.support.v7.widget.CardView>
 

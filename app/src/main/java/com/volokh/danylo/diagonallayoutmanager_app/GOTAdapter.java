@@ -6,18 +6,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
 
-public class SampleAdapter extends RecyclerView.Adapter<SampleAdapter.SampleViewHolder> {
+public class GOTAdapter extends RecyclerView.Adapter<GOTAdapter.SampleViewHolder> {
 
-    private static final String TAG = SampleAdapter.class.getSimpleName();
+    private static final String TAG = GOTAdapter.class.getSimpleName();
 
     private final FragmentActivity mActivity;
-    private final List<String> mList;
+    private final List<GOT_hero> mList;
 
-    public SampleAdapter(FragmentActivity activity, List<String> list) {
+    public GOTAdapter(FragmentActivity activity, List<GOT_hero> list) {
         mActivity = activity;
         mList = list;
     }
@@ -36,7 +37,10 @@ public class SampleAdapter extends RecyclerView.Adapter<SampleAdapter.SampleView
     @Override
     public void onBindViewHolder(SampleViewHolder holder, int position) {
         Log.v(TAG, "onBindViewHolder, position " + position);
-        holder.mTextView.setText(mList.get(position));
+        GOT_hero hero = mList.get(position);
+
+        holder.mTextView.setText(hero.quote);
+        holder.mAvatar.setImageResource(hero.imageResource);
     }
 
     @Override
@@ -47,10 +51,12 @@ public class SampleAdapter extends RecyclerView.Adapter<SampleAdapter.SampleView
     static class SampleViewHolder extends RecyclerView.ViewHolder{
 
         private final TextView mTextView;
+        private final ImageView mAvatar;
 
         public SampleViewHolder(View itemView) {
             super(itemView);
-            mTextView = (TextView) itemView.findViewById(R.id.item_sample_text);
+            mTextView = (TextView) itemView.findViewById(R.id.quote);
+            mAvatar = (ImageView) itemView.findViewById(R.id.avatar);
         }
     }
 
