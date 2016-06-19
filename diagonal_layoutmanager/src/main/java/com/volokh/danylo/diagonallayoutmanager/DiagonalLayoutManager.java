@@ -11,13 +11,14 @@ import android.view.View;
 public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
     private static final String TAG = DiagonalLayoutManager.class.getSimpleName();
+    private static final boolean SHOW_LOGS = false;
 
     private final int mStepSize;
     private int mLastVisiblePosition;
 
     private int mFirstVisiblePosition;
 
-    public DiagonalLayoutManager(Context context){
+    public DiagonalLayoutManager(Context context) {
         mStepSize = context.getResources().getDimensionPixelSize(R.dimen.step_size);
     }
 
@@ -45,11 +46,12 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         int viewTop = getPaddingTop();
         int viewLeft = getPaddingLeft();
 
-        Log.v(TAG, "onLayoutChildren");
+        if (SHOW_LOGS) Log.v(TAG, "onLayoutChildren");
 
         boolean isLastLaidOutView;
-        do{
-            Log.v(TAG, "onLayoutChildren, do, mLastVisiblePosition " + mLastVisiblePosition);
+        do {
+            if (SHOW_LOGS)
+                Log.v(TAG, "onLayoutChildren, do, mLastVisiblePosition " + mLastVisiblePosition);
 
             View view = recycler.getViewForPosition(mLastVisiblePosition);
             addView(view);
@@ -58,11 +60,12 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
             int measuredWidth = getDecoratedMeasuredWidth(view);
             int measuredHeight = getDecoratedMeasuredHeight(view);
 
-            Log.v(TAG, "onLayoutChildren, do, viewLeft " + viewLeft);
-            Log.v(TAG, "onLayoutChildren, do, viewTop " + viewTop);
-            Log.v(TAG, "onLayoutChildren, do, measuredWidth " + measuredWidth);
-            Log.v(TAG, "onLayoutChildren, do, measuredHeight " + measuredHeight);
-
+            if (SHOW_LOGS) {
+                Log.v(TAG, "onLayoutChildren, do, viewLeft " + viewLeft);
+                Log.v(TAG, "onLayoutChildren, do, viewTop " + viewTop);
+                Log.v(TAG, "onLayoutChildren, do, measuredWidth " + measuredWidth);
+                Log.v(TAG, "onLayoutChildren, do, measuredHeight " + measuredHeight);
+            }
 
             layoutDecorated(view, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
 
@@ -74,7 +77,7 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
             isLastLaidOutView = isLastLaidOutView(view);
 
-        } while(!isLastLaidOutView && mLastVisiblePosition < itemCount);
+        } while (!isLastLaidOutView && mLastVisiblePosition < itemCount);
 
     }
 
@@ -88,17 +91,21 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
      */
     private boolean isLastLaidOutView(View view) {
         int left = view.getLeft(); // space from left edge of RecyclerView to left side of the view
-        Log.v(TAG, "isLastLaidOutView, left " + left);
-        Log.v(TAG, "isLastLaidOutView, mStepSize " + mStepSize);
+        if (SHOW_LOGS) {
+            Log.v(TAG, "isLastLaidOutView, left " + left);
+            Log.v(TAG, "isLastLaidOutView, mStepSize " + mStepSize);
+        }
 
         int nextViewLeft = left + mStepSize;
-        Log.v(TAG, "isLastLaidOutView, width " + getWidth());
-        Log.v(TAG, "isLastLaidOutView, leftPadding " + getPaddingLeft());
-        Log.v(TAG, "isLastLaidOutView, rightPadding " + getPaddingRight());
+        if (SHOW_LOGS) {
+            Log.v(TAG, "isLastLaidOutView, width " + getWidth());
+            Log.v(TAG, "isLastLaidOutView, leftPadding " + getPaddingLeft());
+            Log.v(TAG, "isLastLaidOutView, rightPadding " + getPaddingRight());
+        }
 
         int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
-        if(nextViewLeft > recyclerViewRightEdge){
+        if (nextViewLeft > recyclerViewRightEdge) {
             return true;
         }
 
@@ -117,9 +124,11 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
     @Override
     public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
-        Log.v(TAG, "scrollVerticallyBy dy " + dy);
         int childCount = getChildCount();
-        Log.v(TAG, "scrollVerticallyBy childCount " + childCount);
+        if (SHOW_LOGS) {
+            Log.v(TAG, "scrollVerticallyBy dy " + dy);
+            Log.v(TAG, "scrollVerticallyBy childCount " + childCount);
+        }
 
         if (childCount == 0) {
             // we cannot scroll if we don't have views
@@ -152,8 +161,10 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         } else { // Contents are scrolling down
             //Check against top bound
             int leftOffset = firstView.getLeft();
-            Log.v(TAG, "checkBoundsReached, leftOffset " + leftOffset);
-            Log.v(TAG, "checkBoundsReached, dy " + dy);
+            if (SHOW_LOGS) {
+                Log.v(TAG, "checkBoundsReached, leftOffset " + leftOffset);
+                Log.v(TAG, "checkBoundsReached, dy " + dy);
+            }
 
             if (isFirstItemReached) {
                 delta = -Math.max(dy, leftOffset);
@@ -178,12 +189,76 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
         } else {
             /** Scroll up*/
-//            recycleBottomIfNeeded(lastView, recycler);
-//            addTopIfNeeded(firstView, recycler);
+            recycleBottomIfNeeded(lastView, recycler);
+            addTopIfNeeded(firstView, recycler);
         }
         /** perform recycling*/
 
         return delta;
+    }
+
+    private void addTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
+        int leftOffset = firstView.getLeft();
+        if (SHOW_LOGS) Log.v(TAG, "addTopIfNeeded, leftOffset " + leftOffset);
+
+        if (leftOffset >= 0) {
+
+            if (SHOW_LOGS)
+                Log.v(TAG, "addTopIfNeeded, firstVisiblePosition " + mFirstVisiblePosition);
+
+            if (mFirstVisiblePosition > 0) {
+                if (SHOW_LOGS) Log.i(TAG, "addTopIfNeeded, add to top");
+
+                View newFirstView = recycler.getViewForPosition(mFirstVisiblePosition - 1);
+
+
+                addView(newFirstView, 0);
+                measureChildWithMargins(newFirstView, 0, 0);
+
+                int measuredWidth = getDecoratedMeasuredWidth(newFirstView);
+                int measuredHeight = getDecoratedMeasuredHeight(newFirstView);
+
+                int viewLeft = firstView.getLeft() - mStepSize;
+                int viewTop = firstView.getTop() - measuredHeight;
+                if (SHOW_LOGS) {
+                    Log.v(TAG, "onLayoutChildren, do, viewLeft " + viewLeft);
+                    Log.v(TAG, "onLayoutChildren, do, viewTop " + viewTop);
+                    Log.v(TAG, "onLayoutChildren, do, measuredWidth " + measuredWidth);
+                    Log.v(TAG, "onLayoutChildren, do, measuredHeight " + measuredHeight);
+                }
+
+
+                layoutDecorated(newFirstView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
+                mFirstVisiblePosition--;
+            } else {
+                // this is first view there is no views to add to the top
+            }
+        }
+    }
+
+    private void recycleBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
+        /**
+         * Scroll up. Finger is pulling down
+         * This mean that view that goes to bottom-right direction might hide.
+         * If view is hidden we will recycle it
+         */
+
+        int recyclerViewHeight = getHeight();
+
+        int lastViewLeft = lastView.getLeft();
+
+        if (SHOW_LOGS) {
+            Log.v(TAG, "recycleBottomIfNeeded recyclerViewHeight " + recyclerViewHeight);
+            Log.v(TAG, "recycleBottomIfNeeded lastViewLeft " + lastViewLeft);
+        }
+
+        int rightEdge = getWidth() - getPaddingRight();
+
+        if (lastViewLeft > rightEdge) {
+            removeView(lastView);
+            mLastVisiblePosition--;
+            recycler.recycleView(lastView);
+        }
     }
 
     private void addToBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
@@ -191,17 +266,19 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
         int rightOffset = recyclerViewRightEdge - lastView.getRight();
-        Log.v(TAG, "addToBottomIfNeeded, rightOffset " + rightOffset);
+        if (SHOW_LOGS) Log.v(TAG, "addToBottomIfNeeded, rightOffset " + rightOffset);
 
         if (rightOffset > 0) {
             int itemCount = getItemCount();
-
-            Log.v(TAG, "addToBottomIfNeeded, itemCount " + itemCount);
             int nextPosition = mLastVisiblePosition + 1;
-            Log.v(TAG, "addToBottomIfNeeded, nextPosition " + nextPosition);
+
+            if (SHOW_LOGS) {
+                Log.v(TAG, "addToBottomIfNeeded, itemCount " + itemCount);
+                Log.v(TAG, "addToBottomIfNeeded, nextPosition " + nextPosition);
+            }
 
             if (nextPosition <= itemCount) {
-                Log.i(TAG, "addToBottomIfNeeded, add new view to bottom");
+                if (SHOW_LOGS) Log.i(TAG, "addToBottomIfNeeded, add new view to bottom");
 
                 View newLastView = recycler.getViewForPosition(nextPosition - 1);
 
@@ -228,11 +305,11 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         int recyclerViewLeftEdge = getPaddingLeft();
         boolean needRecycling = firstView.getRight() < recyclerViewLeftEdge;
 
-        Log.v(TAG, "recycleTopIfNeeded, needRecycling " + needRecycling);
+        if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, needRecycling " + needRecycling);
 
         if (needRecycling) {
             // first view is hidden
-            Log.i(TAG, "recycleTopIfNeeded, recycling first view");
+            if (SHOW_LOGS) Log.i(TAG, "recycleTopIfNeeded, recycling first view");
 
             removeView(firstView);
             mFirstVisiblePosition++;
@@ -242,15 +319,13 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
     private boolean isFirstItemReached() {
         boolean isFirstItemReached = mFirstVisiblePosition == 0;
-        Log.v(TAG, "isFirstItemReached, " + isFirstItemReached);
+        if (SHOW_LOGS) Log.v(TAG, "isFirstItemReached, " + isFirstItemReached);
         return isFirstItemReached;
     }
 
     private boolean isLastItemReached() {
         boolean isLastItemReached = mLastVisiblePosition == getItemCount();
-        Log.v(TAG, "isLastItemReached " + isLastItemReached);
+        if (SHOW_LOGS) Log.v(TAG, "isLastItemReached " + isLastItemReached);
         return isLastItemReached;
     }
-
-
 }
