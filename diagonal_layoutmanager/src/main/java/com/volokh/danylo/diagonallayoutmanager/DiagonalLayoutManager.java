@@ -11,11 +11,11 @@ import android.view.View;
 public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
     private static final String TAG = DiagonalLayoutManager.class.getSimpleName();
-    private static final boolean SHOW_LOGS = false;
+    private static final boolean SHOW_LOGS = true;
 
     private final int mStepSize;
-    private int mLastVisiblePosition;
 
+    private int mLastVisiblePosition;
     private int mFirstVisiblePosition;
 
     public DiagonalLayoutManager(Context context) {
@@ -34,19 +34,21 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         //We have nothing to show for an empty data set but clear any existing views
         int itemCount = getItemCount();
         if (itemCount == 0) {
-            removeAllViews();
+            removeAndRecycleAllViews(recycler);
             return;
         }
 
-        mLastVisiblePosition = 0;
-        mFirstVisiblePosition = 0;
+        int viewsCount =  getChildCount();
+        if (SHOW_LOGS) Log.v(TAG, "onLayoutChildren, viewsCount " + viewsCount);
 
+        if(viewsCount > 0){
+            return;
+            // onLayout was called when we have views.
+        }
         // TODO: add this to a step
         // TODO: add padding
         int viewTop = getPaddingTop();
         int viewLeft = getPaddingLeft();
-
-        if (SHOW_LOGS) Log.v(TAG, "onLayoutChildren");
 
         boolean isLastLaidOutView;
         do {
@@ -130,7 +132,7 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
             Log.v(TAG, "scrollVerticallyBy childCount " + childCount);
         }
 
-        if (childCount == 0) {
+        if (getChildCount() == 0 || dy == 0) {
             // we cannot scroll if we don't have views
             return 0;
         }
@@ -265,10 +267,12 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
         int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
-        int rightOffset = recyclerViewRightEdge - lastView.getRight();
-        if (SHOW_LOGS) Log.v(TAG, "addToBottomIfNeeded, rightOffset " + rightOffset);
+        int leftOffset = lastView.getLeft() ;
+        if (SHOW_LOGS) Log.v(TAG, "addToBottomIfNeeded, leftOffset " + leftOffset);
 
-        if (rightOffset > 0) {
+        boolean leftEdgeIsVisible = leftOffset < recyclerViewRightEdge;
+
+        if (leftEdgeIsVisible) {
             int itemCount = getItemCount();
             int nextPosition = mLastVisiblePosition + 1;
 
@@ -277,10 +281,10 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
                 Log.v(TAG, "addToBottomIfNeeded, nextPosition " + nextPosition);
             }
 
-            if (nextPosition <= itemCount) {
+            if (nextPosition < itemCount) {
                 if (SHOW_LOGS) Log.i(TAG, "addToBottomIfNeeded, add new view to bottom");
 
-                View newLastView = recycler.getViewForPosition(nextPosition - 1);
+                View newLastView = recycler.getViewForPosition(nextPosition);
 
                 addView(newLastView);
                 measureChildWithMargins(newLastView, 0, 0);
@@ -303,6 +307,9 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
     private void recycleTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
         int recyclerViewLeftEdge = getPaddingLeft();
+        if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, recyclerViewLeftEdge " + recyclerViewLeftEdge);
+        if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, firstView, right " + firstView.getRight());
+
         boolean needRecycling = firstView.getRight() < recyclerViewLeftEdge;
 
         if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, needRecycling " + needRecycling);
@@ -324,7 +331,7 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private boolean isLastItemReached() {
-        boolean isLastItemReached = mLastVisiblePosition == getItemCount();
+        boolean isLastItemReached = mLastVisiblePosition == getItemCount() - 1;
         if (SHOW_LOGS) Log.v(TAG, "isLastItemReached " + isLastItemReached);
         return isLastItemReached;
     }

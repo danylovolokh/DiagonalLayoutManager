@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.List;
 
 public class GOTAdapter extends RecyclerView.Adapter<GOTAdapter.SampleViewHolder> {
@@ -36,11 +38,19 @@ public class GOTAdapter extends RecyclerView.Adapter<GOTAdapter.SampleViewHolder
 
     @Override
     public void onBindViewHolder(SampleViewHolder holder, int position) {
-        Log.v(TAG, "onBindViewHolder, position " + position);
+        Log.v(TAG, ">> onBindViewHolder, position " + position);
         GOT_hero hero = mList.get(position);
 
         holder.mTextView.setText(hero.quote);
-        holder.mAvatar.setImageResource(hero.imageResource);
+
+        Glide
+                .with(mActivity)
+                .load(hero.imageResource)
+                .centerCrop()
+                .crossFade()
+                .into(holder.mAvatar);
+        Log.v(TAG, "<< onBindViewHolder, position " + position);
+
     }
 
     @Override
