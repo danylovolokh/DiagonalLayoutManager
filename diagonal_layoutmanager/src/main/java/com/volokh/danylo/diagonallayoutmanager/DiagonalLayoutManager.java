@@ -57,6 +57,8 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
             mLastVisiblePosition = mSavedState.getFirstViewPosition();
             viewTop = mSavedState.getFirstViewTop();
             viewLeft = mSavedState.getFirstViewLeft();
+
+            mSavedState = null;
         } else {
             viewTop = getPaddingTop();
             viewLeft = getPaddingLeft();
@@ -153,6 +155,11 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         boolean isFirstItemReached = isFirstItemReached();
         boolean isLastItemReached = isLastItemReached();
 
+        if(SHOW_LOGS){
+            Log.v(TAG, "scrollVerticallyBy, isFirstItemReached " + isFirstItemReached);
+            Log.v(TAG, "scrollVerticallyBy, isLastItemReached " + isLastItemReached);
+        }
+
         View firstView = getChildAt(0);
         View lastView = getChildAt(
                 getChildCount() - 1
@@ -177,8 +184,8 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
             //Check against top bound
             int leftOffset = firstView.getLeft();
             if (SHOW_LOGS) {
-                Log.v(TAG, "checkBoundsReached, leftOffset " + leftOffset);
-                Log.v(TAG, "checkBoundsReached, dy " + dy);
+                Log.v(TAG, "scrollVerticallyBy, leftOffset " + leftOffset);
+                Log.v(TAG, "scrollVerticallyBy, dy " + dy);
             }
 
             if (isFirstItemReached) {
@@ -196,6 +203,7 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         }
         /** scroll views*/
 
+        if(SHOW_LOGS) Log.v(TAG, "scrollVerticallyBy, delta " + delta);
         /** perform recycling*/
         if (delta < 0) {
             /** Scroll down*/
@@ -209,7 +217,7 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         }
         /** perform recycling*/
 
-        return delta;
+        return -delta;
     }
 
     private void addTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
@@ -353,12 +361,18 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
     public Parcelable onSaveInstanceState() {
         if (SHOW_LOGS) Log.v(TAG, "onSaveInstanceState");
 
-        View firstView = getChildAt(0);
+        if(getChildCount() > 0){
 
-        int firstViewTop = firstView.getTop();
-        int firstViewLeft = firstView.getLeft();
+            View firstView = getChildAt(0);
+            if (SHOW_LOGS) Log.v(TAG, "onSaveInstanceState, firstView " + firstView);
 
-        return new SavedState(mFirstVisiblePosition, firstViewTop, firstViewLeft);
+            int firstViewTop = firstView.getTop();
+            int firstViewLeft = firstView.getLeft();
+            mSavedState = new SavedState(mFirstVisiblePosition, firstViewTop, firstViewLeft);
+        }
+
+
+        return mSavedState;
     }
 
     @Override
