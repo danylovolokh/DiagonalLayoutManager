@@ -27,8 +27,12 @@ public class MainActivity extends AppCompatActivity {
             new GOT_hero("I am Daenerys Stormborn of the blood of old Valyria and I will take what is mine! With fire and blood", R.drawable.daenerys_targaryen),
             new GOT_hero("You know nothing Jon Snow", R.drawable.ingrid),
             new GOT_hero("Time for the bedding ceremony!", R.drawable.joffrey),
-            new GOT_hero("I've won every battle, but I'm losing this war", R.drawable.rob_stark)
-    ));
+            new GOT_hero("I've won every battle, but I'm losing this war", R.drawable.rob_stark),
+            new GOT_hero("A crown for the king", R.drawable.khal_drogo),
+            new GOT_hero("Storms come and go, the big fish eat the little fish, and I keep on paddling", R.drawable.varys),
+            new GOT_hero("Jaime f**kin' Lannister \n Podrick f**kin' Payne", R.drawable.bronn)
+
+            ));
 
 
     @Override

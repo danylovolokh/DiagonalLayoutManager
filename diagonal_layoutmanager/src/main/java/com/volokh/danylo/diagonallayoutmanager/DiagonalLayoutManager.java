@@ -1,6 +1,8 @@
 package com.volokh.danylo.diagonallayoutmanager;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +19,8 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
     private int mLastVisiblePosition;
     private int mFirstVisiblePosition;
+
+    private SavedState mSavedState;
 
     public DiagonalLayoutManager(Context context) {
         mStepSize = context.getResources().getDimensionPixelSize(R.dimen.step_size);
@@ -45,10 +49,19 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
             return;
             // onLayout was called when we have views.
         }
-        // TODO: add this to a step
-        // TODO: add padding
-        int viewTop = getPaddingTop();
-        int viewLeft = getPaddingLeft();
+
+        int viewTop;
+        int viewLeft;
+
+        if(mSavedState != null){
+            mLastVisiblePosition = mSavedState.getFirstViewPosition();
+            viewTop = mSavedState.getFirstViewTop();
+            viewLeft = mSavedState.getFirstViewLeft();
+        } else {
+            viewTop = getPaddingTop();
+            viewLeft = getPaddingLeft();
+        }
+
 
         boolean isLastLaidOutView;
         do {
@@ -334,5 +347,79 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         boolean isLastItemReached = mLastVisiblePosition == getItemCount() - 1;
         if (SHOW_LOGS) Log.v(TAG, "isLastItemReached " + isLastItemReached);
         return isLastItemReached;
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        if (SHOW_LOGS) Log.v(TAG, "onSaveInstanceState");
+
+        View firstView = getChildAt(0);
+
+        int firstViewTop = firstView.getTop();
+        int firstViewLeft = firstView.getLeft();
+
+        return new SavedState(mFirstVisiblePosition, firstViewTop, firstViewLeft);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (SHOW_LOGS) Log.v(TAG, "onRestoreInstanceState, mSavedState " + mSavedState);
+        mSavedState = (SavedState) state;
+    }
+
+    private static class SavedState implements Parcelable {
+
+        private final int mFirstViewPosition;
+        private final int mFirstViewTop;
+        private final int mFirstViewLeft;
+
+
+        public SavedState(int firstViewPosition, int firstViewTop, int firstViewLeft) {
+            mFirstViewPosition = firstViewPosition;
+            mFirstViewTop = firstViewTop;
+            mFirstViewLeft = firstViewLeft;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.mFirstViewPosition);
+            dest.writeInt(this.mFirstViewTop);
+            dest.writeInt(this.mFirstViewLeft);
+        }
+
+        protected SavedState(Parcel in) {
+            this.mFirstViewPosition = in.readInt();
+            this.mFirstViewTop = in.readInt();
+            this.mFirstViewLeft = in.readInt();
+        }
+
+        public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel source) {
+                return new SavedState(source);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+
+        public int getFirstViewTop() {
+            return mFirstViewTop;
+        }
+
+        public int getFirstViewLeft() {
+            return mFirstViewLeft;
+        }
+
+        public int getFirstViewPosition() {
+            return mFirstViewPosition;
+        }
     }
 }
