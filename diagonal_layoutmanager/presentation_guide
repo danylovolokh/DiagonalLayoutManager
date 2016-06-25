@@ -1,0 +1,403 @@
+
+
+/**
+ * First of all : If items were removed remove views
+ */
+        int itemCount=getItemCount();
+
+        if(itemCount==0){
+            removeAndRecycleAllViews(recycler);
+            return;
+        }
+/***************************************************/
+
+ /**
+  * This pease of code will be explainded later
+  */
+        int viewsCount=getChildCount();
+        if(SHOW_LOGS)Log.v(TAG,"onLayoutChildren, viewsCount "+viewsCount);
+
+        if(viewsCount>0){
+            return;
+            // onLayout was called when we have views.
+        }
+/***************************************************/
+
+/**
+ *  view top and view left start positions
+ */
+
+        int viewTop = 0;
+        int viewLeft = 0;
+/**************************************************/
+
+ /**
+  * How to identify last view
+  */
+
+        private boolean isLastLaidOutView(View view) {
+        int left = view.getLeft(); // space from left edge of RecyclerView to left side of the view
+
+        int nextViewLeft = left + mStepSize;
+
+        int recyclerViewRightEdge = getWidth() - getPaddingRight();
+
+        if (nextViewLeft > recyclerViewRightEdge) {
+            return true;
+        }
+
+            return false;
+        }
+
+/***************************************************/
+
+
+
+ /**
+  * Layout views
+  *
+  */
+        boolean isLastLaidOutView;
+        do {
+            if (SHOW_LOGS)
+            Log.v(TAG, "onLayoutChildren, do, mLastVisiblePosition " + mLastVisiblePosition);
+
+            View view = recycler.getViewForPosition(mLastVisiblePosition);
+            addView(view);
+            measureChildWithMargins(view, 0, 0);
+
+            int measuredWidth = getDecoratedMeasuredWidth(view);
+            int measuredHeight = getDecoratedMeasuredHeight(view);
+
+            layoutDecorated(view, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
+
+            // this assumes that all views are the same height
+            viewLeft += mStepSize;
+            viewTop += measuredHeight;
+
+            mLastVisiblePosition++;
+
+            isLastLaidOutView = isLastLaidOutView(view);
+
+        } while (!isLastLaidOutView && mLastVisiblePosition < itemCount);
+/***************************************************/
+
+/**
+ * Take paddings into accout
+ */
+
+        viewTop = getPaddingTop();
+        viewLeft = getPaddingLeft();
+/***************************************************/
+
+ /**
+  * Define scrool directions
+  */
+
+        @Override
+        public boolean canScrollVertically() {
+            return true;
+        }
+
+/***************************************************/
+
+ /**
+ * scrollVerticallyBy
+ */
+        @Override
+        public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+            int childCount = getChildCount();
+
+            if (getChildCount() == 0 || dy == 0) {
+                // we cannot scroll if we don't have views
+                return 0;
+            }
+
+            boolean isFirstItemReached = isFirstItemReached();
+            boolean isLastItemReached = isLastItemReached();
+
+            View firstView = getChildAt(0);
+            View lastView = getChildAt(
+            getChildCount() - 1
+            );
+
+            /** scroll views*/
+            int delta;
+
+            if (dy > 0) { // Contents are scrolling up
+               //Check against bottom bound
+               if (isLastItemReached) {
+                    //If we've reached the last row, enforce limits
+                    int recyclerViewRightEdge = getWidth() - getPaddingRight();
+
+                    int rightOffset = recyclerViewRightEdge - lastView.getRight();
+                    delta = Math.max(-dy, rightOffset);
+                } else {
+                    delta = -dy;
+                }
+            } else { // Contents are scrolling down
+                //Check against top bound
+                int leftOffset = firstView.getLeft();
+
+                if (isFirstItemReached) {
+                    delta = -Math.max(dy, leftOffset);
+                } else {
+                    delta = -dy;
+                }
+            }
+
+            for (int indexOfView = 0; indexOfView < childCount; indexOfView++) {
+                View view = getChildAt(indexOfView);
+                view.offsetTopAndBottom(delta);
+                view.offsetLeftAndRight(delta);
+            }
+            /** scroll views*/
+
+            /** perform recycling*/
+            if (delta < 0) {
+                /** Scroll down*/
+                recycleTopIfNeeded(firstView, recycler);
+                addToBottomIfNeeded(lastView, recycler);
+
+            } else {
+                /** Scroll up*/
+                recycleBottomIfNeeded(lastView, recycler);
+                addTopIfNeeded(firstView, recycler);
+            }
+                /** perform recycling*/
+
+            return -delta;
+        }
+
+/**
+ * Add to top if needed
+ */
+        private void addTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
+            int leftOffset = firstView.getLeft();
+            if (leftOffset >= 0) {
+
+                if (mFirstVisiblePosition > 0) {
+                    View newFirstView = recycler.getViewForPosition(mFirstVisiblePosition - 1);
+
+                    addView(newFirstView, 0);
+                    measureChildWithMargins(newFirstView, 0, 0);
+
+                    int measuredWidth = getDecoratedMeasuredWidth(newFirstView);
+                    int measuredHeight = getDecoratedMeasuredHeight(newFirstView);
+
+                    int viewLeft = firstView.getLeft() - mStepSize;
+                    int viewTop = firstView.getTop() - measuredHeight;
+
+                    layoutDecorated(newFirstView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
+                    mFirstVisiblePosition--;
+                } else {
+                    // this is first view there is no views to add to the top
+                }
+            }
+        }
+/***************************************************/
+
+/**
+ * implement recycler bottom if needed
+ */
+        private void recycleBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
+            /**
+             * Scroll up. Finger is pulling down
+             * This mean that view that goes to bottom-right direction might hide.
+             * If view is hidden we will recycle it
+             */
+
+            int recyclerViewHeight = getHeight();
+
+            int lastViewLeft = lastView.getLeft();
+
+            int rightEdge = getWidth() - getPaddingRight();
+
+            if (lastViewLeft > rightEdge) {
+                removeView(lastView);
+                mLastVisiblePosition--;
+                recycler.recycleView(lastView);
+            }
+        }
+/**
+ * implement addToBottomIfNeeded
+ */
+        private void addToBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
+
+            int recyclerViewRightEdge = getWidth() - getPaddingRight();
+
+            int leftOffset = lastView.getLeft() ;
+            if (SHOW_LOGS) Log.v(TAG, "addToBottomIfNeeded, leftOffset " + leftOffset);
+
+            boolean leftEdgeIsVisible = leftOffset < recyclerViewRightEdge;
+
+            if (leftEdgeIsVisible) {
+                int itemCount = getItemCount();
+                int nextPosition = mLastVisiblePosition + 1;
+
+                if (nextPosition < itemCount) {
+
+                    View newLastView = recycler.getViewForPosition(nextPosition);
+
+                    addView(newLastView);
+                    measureChildWithMargins(newLastView, 0, 0);
+
+                    int measuredWidth = getDecoratedMeasuredWidth(newLastView);
+                    int measuredHeight = getDecoratedMeasuredHeight(newLastView);
+                    // TODO: add this to a step
+                    // TODO: add padding
+                    int viewTop = lastView.getBottom();
+                    int viewLeft = lastView.getLeft() + mStepSize;
+
+                    layoutDecorated(newLastView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
+
+                    mLastVisiblePosition++;
+                } else {
+                    // last view is the last item. Do nothing
+                }
+            }
+        }
+
+/**
+ * Implement recycleTopIfNeeded
+ */
+        private void recycleTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
+            int recyclerViewLeftEdge = getPaddingLeft();
+
+            boolean needRecycling = firstView.getRight() < recyclerViewLeftEdge;
+
+            if (needRecycling) {
+                // first view is hidden
+                if (SHOW_LOGS) Log.i(TAG, "recycleTopIfNeeded, recycling first view");
+
+                removeView(firstView);
+                mFirstVisiblePosition++;
+                recycler.recycleView(firstView);
+            }
+        }
+/***************************************************/
+
+/**
+ * implement isFirstItemReached and isLastItemReached
+ */
+         private boolean isFirstItemReached() {
+             boolean isFirstItemReached = mFirstVisiblePosition == 0;
+             if (SHOW_LOGS) Log.v(TAG, "isFirstItemReached, " + isFirstItemReached);
+             return isFirstItemReached;
+         }
+
+         private boolean isLastItemReached() {
+             boolean isLastItemReached = mLastVisiblePosition == getItemCount() - 1;
+             if (SHOW_LOGS) Log.v(TAG, "isLastItemReached " + isLastItemReached);
+             return isLastItemReached;
+         }
+
+/***************************************************/
+
+/**
+ * Wee need saved state class to keep the data about childs
+ */
+        private static class SavedState implements Parcelable {
+
+            private final int mFirstViewPosition;
+            private final int mFirstViewTop;
+            private final int mFirstViewLeft;
+
+
+            public SavedState(int firstViewPosition, int firstViewTop, int firstViewLeft) {
+                mFirstViewPosition = firstViewPosition;
+                mFirstViewTop = firstViewTop;
+                mFirstViewLeft = firstViewLeft;
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+                dest.writeInt(this.mFirstViewPosition);
+                dest.writeInt(this.mFirstViewTop);
+                dest.writeInt(this.mFirstViewLeft);
+            }
+
+            protected SavedState(Parcel in) {
+                this.mFirstViewPosition = in.readInt();
+                this.mFirstViewTop = in.readInt();
+                this.mFirstViewLeft = in.readInt();
+            }
+
+            public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+                @Override
+                public SavedState createFromParcel(Parcel source) {
+                    return new SavedState(source);
+                }
+
+                @Override
+                public SavedState[] newArray(int size) {
+                    return new SavedState[size];
+                }
+            };
+
+            public int getFirstViewTop() {
+                return mFirstViewTop;
+            }
+
+            public int getFirstViewLeft() {
+                return mFirstViewLeft;
+            }
+
+            public int getFirstViewPosition() {
+                return mFirstViewPosition;
+            }
+        }
+/***************************************************/
+
+/**
+ * Save and restore state
+ */
+
+        @Override
+        public Parcelable onSaveInstanceState() {
+            if (SHOW_LOGS) Log.v(TAG, "onSaveInstanceState");
+
+            if(getChildCount() > 0){
+
+                View firstView = getChildAt(0);
+                if (SHOW_LOGS) Log.v(TAG, "onSaveInstanceState, firstView " + firstView);
+
+                int firstViewTop = firstView.getTop();
+                int firstViewLeft = firstView.getLeft();
+                mSavedState = new SavedState(mFirstVisiblePosition, firstViewTop, firstViewLeft);
+            }
+
+
+            return mSavedState;
+        }
+
+        @Override
+        public void onRestoreInstanceState(Parcelable state) {
+            if (SHOW_LOGS) Log.v(TAG, "onRestoreInstanceState, mSavedState " + mSavedState);
+            mSavedState = (SavedState) state;
+        }
+
+/***************************************************/
+
+/**
+ * Use saved state
+ */
+        int viewTop;
+        int viewLeft;
+
+        if(mSavedState != null){
+            mLastVisiblePosition = mSavedState.getFirstViewPosition();
+            viewTop = mSavedState.getFirstViewTop();
+            viewLeft = mSavedState.getFirstViewLeft();
+
+            mSavedState = null;
+        } else {
+            viewTop = getPaddingTop();
+            viewLeft = getPaddingLeft();
+        }
+/***************************************************/
