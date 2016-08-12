@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DiagonalLayoutManager.iml" filepath="$PROJECT_DIR$/DiagonalLayoutManager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DiagonalLayoutManager_github.iml" filepath="$PROJECT_DIR$/DiagonalLayoutManager_github.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/diagonal_layoutmanager/diagonal_layoutmanager.iml" filepath="$PROJECT_DIR$/diagonal_layoutmanager/diagonal_layoutmanager.iml" />
+      <module fileurl="file://$PROJECT_DIR$/diagonal-layout-manager/diagonal-layout-manager.iml" filepath="$PROJECT_DIR$/diagonal-layout-manager/diagonal-layout-manager.iml" />
     </modules>
   </component>
 </project>

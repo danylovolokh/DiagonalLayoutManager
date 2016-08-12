@@ -43,7 +43,8 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setAdapter(new GOTAdapter(this, GOT_Characters));
 
-        recyclerView.setLayoutManager(new DiagonalLayoutManager(this));
+        int stepSize = getResources().getDimensionPixelSize(R.dimen.step_size);
+        recyclerView.setLayoutManager(new DiagonalLayoutManager(stepSize));
 
     }
 }

@@ -1,6 +1,5 @@
 package com.volokh.danylo.diagonallayoutmanager;
 
-import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +8,15 @@ import android.view.View;
 
 /**
  * Created by danylo.volokh on 6/16/16.
+ *
+ * This layout manager moves it's children (views) in diagonal way
+ *
+ * See https://github.com/danylovolokh/DiagonalLayoutManager for details.
+ *
+ * There is a presentation guide file:
+ * If you need to create a presentation of how it's implemented please check "presentation_guide"
+ *
+ * It does not support dynamic add and remove of views. Predictive animations are also not supported.
  */
 public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
@@ -22,8 +30,8 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
 
     private SavedState mSavedState;
 
-    public DiagonalLayoutManager(Context context) {
-        mStepSize = context.getResources().getDimensionPixelSize(R.dimen.step_size);
+    public DiagonalLayoutManager(int stepSize) {
+        mStepSize = stepSize;
     }
 
     @Override
@@ -327,11 +335,11 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private void recycleTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
-        int recyclerViewLeftEdge = getPaddingLeft();
-        if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, recyclerViewLeftEdge " + recyclerViewLeftEdge);
+        int recyclerViewTopEdge = getPaddingTop();
+        if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, recyclerViewTopEdge " + recyclerViewTopEdge);
         if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, firstView, right " + firstView.getRight());
 
-        boolean needRecycling = firstView.getRight() < recyclerViewLeftEdge;
+        boolean needRecycling = firstView.getBottom() < recyclerViewTopEdge;
 
         if (SHOW_LOGS) Log.v(TAG, "recycleTopIfNeeded, needRecycling " + needRecycling);
 

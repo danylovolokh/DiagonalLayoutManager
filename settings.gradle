@@ -1,1 +1,1 @@
-include ':app', ':diagonal_layoutmanager'
+include ':app', ':diagonal-layout-manager'
