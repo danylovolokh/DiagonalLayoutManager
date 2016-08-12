@@ -1,66 +1,158 @@
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+
+public class PresentationGuide extends RecyclerView.LayoutManager{
+
+    /**
+     * Implement only method that we have to implement
+     */
+    @Override
+    public RecyclerView.LayoutParams generateDefaultLayoutParams() {
+        return new RecyclerView.LayoutParams(
+                RecyclerView.LayoutParams.WRAP_CONTENT,
+                RecyclerView.LayoutParams.WRAP_CONTENT);
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
 
 
-/**
- * First of all : If items were removed remove views
- */
-        int itemCount=getItemCount();
 
-        if(itemCount==0){
-            removeAndRecycleAllViews(recycler);
-            return;
-        }
-/***************************************************/
 
- /**
-  * This pease of code will be explainded later
-  */
-        int viewsCount=getChildCount();
-        if(SHOW_LOGS)Log.v(TAG,"onLayoutChildren, viewsCount "+viewsCount);
 
-        if(viewsCount>0){
-            return;
-            // onLayout was called when we have views.
-        }
-/***************************************************/
 
-/**
- *  view top and view left start positions
- */
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Implement onLayoutChildren
+     */
+    @Override
+    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+    }
+
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Get view from recycler
+     *
+     */
+    @Override
+    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+
+        View view = recycler.getViewForPosition(0);
+        addView(view);
+        measureChildWithMargins(view, 0, 0);
+
+        int measuredWidth = getDecoratedMeasuredWidth(view);
+        int measuredHeight = getDecoratedMeasuredHeight(view);
 
         int viewTop = 0;
         int viewLeft = 0;
-/**************************************************/
 
- /**
-  * How to identify last view
-  */
+        layoutDecorated(view, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
 
-        private boolean isLastLaidOutView(View view) {
-        int left = view.getLeft(); // space from left edge of RecyclerView to left side of the view
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
 
-        int nextViewLeft = left + mStepSize;
 
-        int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
-        if (nextViewLeft > recyclerViewRightEdge) {
-            return true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Repeat add view until we have space on the screen
+     */
+
+    private final int mStepSize;
+    private int mLastVisiblePosition;
+
+    public DemoLayoutManager(Context context) {
+        mStepSize = context.getResources().getDimensionPixelSize(com.volokh.danylo.diagonallayoutmanager.R.dimen.step_size);
+    }
+
+    @Override
+    public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+
+        int viewsCount =  getChildCount();
+        if(viewsCount > 0){
+            return;
+            // onLayout was called when we have views.
         }
 
-            return false;
-        }
+        int itemCount = getItemCount();
 
-/***************************************************/
+        int viewTop = 0;
+        int viewLeft = 0;
 
-
-
- /**
-  * Layout views
-  *
-  */
         boolean isLastLaidOutView;
         do {
-            if (SHOW_LOGS)
-            Log.v(TAG, "onLayoutChildren, do, mLastVisiblePosition " + mLastVisiblePosition);
 
             View view = recycler.getViewForPosition(mLastVisiblePosition);
             addView(view);
@@ -68,6 +160,7 @@
 
             int measuredWidth = getDecoratedMeasuredWidth(view);
             int measuredHeight = getDecoratedMeasuredHeight(view);
+
 
             layoutDecorated(view, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
 
@@ -80,324 +173,871 @@
             isLastLaidOutView = isLastLaidOutView(view);
 
         } while (!isLastLaidOutView && mLastVisiblePosition < itemCount);
-/***************************************************/
+    }
 
-/**
- * Take paddings into accout
- */
+    /**
+     * Method that looks if left edge of NEXT view will be
+     * hidden by the right edge of the RecyclerView
+     */
+    private boolean isLastLaidOutView(View view) {
+        int left = view.getLeft(); // space from left edge of RecyclerView to left side of the view
 
-        viewTop = getPaddingTop();
-        viewLeft = getPaddingLeft();
-/***************************************************/
+        // left side of next view will be shifted by mStepSize
+        int nextViewLeft = left + mStepSize;
 
- /**
-  * Define scrool directions
-  */
+        int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
-        @Override
-        public boolean canScrollVertically() {
+        if (nextViewLeft > recyclerViewRightEdge) {
             return true;
         }
 
-/***************************************************/
+        return false;
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
 
- /**
- * scrollVerticallyBy
- */
-        @Override
-        public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
-            int childCount = getChildCount();
 
-            if (getChildCount() == 0 || dy == 0) {
-                // we cannot scroll if we don't have views
-                return 0;
-            }
 
-            boolean isFirstItemReached = isFirstItemReached();
-            boolean isLastItemReached = isLastItemReached();
 
-            View firstView = getChildAt(0);
-            View lastView = getChildAt(
-            getChildCount() - 1
-            );
 
-            /** scroll views*/
-            int delta;
 
-            if (dy > 0) { // Contents are scrolling up
-               //Check against bottom bound
-               if (isLastItemReached) {
-                    //If we've reached the last row, enforce limits
-                    int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
-                    int rightOffset = recyclerViewRightEdge - lastView.getRight();
-                    delta = Math.max(-dy, rightOffset);
-                } else {
-                    delta = -dy;
-                }
-            } else { // Contents are scrolling down
-                //Check against top bound
-                int leftOffset = firstView.getLeft();
 
-                if (isFirstItemReached) {
-                    delta = -Math.max(dy, leftOffset);
-                } else {
-                    delta = -dy;
-                }
-            }
 
-            for (int indexOfView = 0; indexOfView < childCount; indexOfView++) {
-                View view = getChildAt(indexOfView);
-                view.offsetTopAndBottom(delta);
-                view.offsetLeftAndRight(delta);
-            }
-            /** scroll views*/
 
-            /** perform recycling*/
-            if (delta < 0) {
-                /** Scroll down*/
-                recycleTopIfNeeded(firstView, recycler);
-                addToBottomIfNeeded(lastView, recycler);
 
-            } else {
-                /** Scroll up*/
-                recycleBottomIfNeeded(lastView, recycler);
-                addTopIfNeeded(firstView, recycler);
-            }
-                /** perform recycling*/
 
-            return -delta;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Define scroll direction.
+     *
+     * This means that only vertical scroll will be handled
+     */
+    @Override
+    public boolean canScrollVertically() {
+        return true;
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * scrollVerticallyBy
+     */
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        return 0;
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Handle base cases of scrollVerticallyBy:
+     * When there is no views we cannot do the scroll
+     *
+     * We need to return the actual distance we scrolled.
+     * Example:
+     *  dy = -25
+     *
+     *  if ( we had space to move views  by 25 pixels )
+     *      return -25
+     *  else
+     *      calculate delta :
+     *          delta = actual space to scroll - dy
+     *          delta = -delta;
+     *
+     *  if delta is calculated like this the scroll will work correctly
+     */
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+
+        if (getChildCount() == 0 || dy == 0) {
+            // we cannot scroll if we don't have views
+            return 0;
         }
 
-/**
- * Add to top if needed
- */
-        private void addTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
-            int leftOffset = firstView.getLeft();
-            if (leftOffset >= 0) {
+        // example:
+        return 0;
+    }
 
-                if (mFirstVisiblePosition > 0) {
-                    View newFirstView = recycler.getViewForPosition(mFirstVisiblePosition - 1);
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
 
-                    addView(newFirstView, 0);
-                    measureChildWithMargins(newFirstView, 0, 0);
 
-                    int measuredWidth = getDecoratedMeasuredWidth(newFirstView);
-                    int measuredHeight = getDecoratedMeasuredHeight(newFirstView);
 
-                    int viewLeft = firstView.getLeft() - mStepSize;
-                    int viewTop = firstView.getTop() - measuredHeight;
 
-                    layoutDecorated(newFirstView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
-                    mFirstVisiblePosition--;
-                } else {
-                    // this is first view there is no views to add to the top
-                }
-            }
-        }
-/***************************************************/
 
-/**
- * implement recycler bottom if needed
- */
-        private void recycleBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
-            /**
-             * Scroll up. Finger is pulling down
-             * This mean that view that goes to bottom-right direction might hide.
-             * If view is hidden we will recycle it
-             */
 
-            int recyclerViewHeight = getHeight();
 
-            int lastViewLeft = lastView.getLeft();
 
-            int rightEdge = getWidth() - getPaddingRight();
 
-            if (lastViewLeft > rightEdge) {
-                removeView(lastView);
-                mLastVisiblePosition--;
-                recycler.recycleView(lastView);
-            }
-        }
-/**
- * implement addToBottomIfNeeded
- */
-        private void addToBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
 
-            int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
-            int leftOffset = lastView.getLeft() ;
-            if (SHOW_LOGS) Log.v(TAG, "addToBottomIfNeeded, leftOffset " + leftOffset);
 
-            boolean leftEdgeIsVisible = leftOffset < recyclerViewRightEdge;
 
-            if (leftEdgeIsVisible) {
-                int itemCount = getItemCount();
-                int nextPosition = mLastVisiblePosition + 1;
 
-                if (nextPosition < itemCount) {
 
-                    View newLastView = recycler.getViewForPosition(nextPosition);
 
-                    addView(newLastView);
-                    measureChildWithMargins(newLastView, 0, 0);
 
-                    int measuredWidth = getDecoratedMeasuredWidth(newLastView);
-                    int measuredHeight = getDecoratedMeasuredHeight(newLastView);
-                    // TODO: add this to a step
-                    // TODO: add padding
-                    int viewTop = lastView.getBottom();
-                    int viewLeft = lastView.getLeft() + mStepSize;
 
-                    layoutDecorated(newLastView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
 
-                    mLastVisiblePosition++;
-                } else {
-                    // last view is the last item. Do nothing
-                }
-            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Define scroll direction: it depends on "dy" sign (positive/negative)
+     */
+
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+
+        if (getChildCount() == 0 || dy == 0) {
+            // we cannot scroll if we don't have views
+            return 0;
         }
 
-/**
- * Implement recycleTopIfNeeded
- */
-        private void recycleTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
-            int recyclerViewLeftEdge = getPaddingLeft();
+        int delta = 0;
 
-            boolean needRecycling = firstView.getRight() < recyclerViewLeftEdge;
-
-            if (needRecycling) {
-                // first view is hidden
-                if (SHOW_LOGS) Log.i(TAG, "recycleTopIfNeeded, recycling first view");
-
-                removeView(firstView);
-                mFirstVisiblePosition++;
-                recycler.recycleView(firstView);
-            }
-        }
-/***************************************************/
-
-/**
- * implement isFirstItemReached and isLastItemReached
- */
-         private boolean isFirstItemReached() {
-             boolean isFirstItemReached = mFirstVisiblePosition == 0;
-             if (SHOW_LOGS) Log.v(TAG, "isFirstItemReached, " + isFirstItemReached);
-             return isFirstItemReached;
-         }
-
-         private boolean isLastItemReached() {
-             boolean isLastItemReached = mLastVisiblePosition == getItemCount() - 1;
-             if (SHOW_LOGS) Log.v(TAG, "isLastItemReached " + isLastItemReached);
-             return isLastItemReached;
-         }
-
-/***************************************************/
-
-/**
- * Wee need saved state class to keep the data about childs
- */
-        private static class SavedState implements Parcelable {
-
-            private final int mFirstViewPosition;
-            private final int mFirstViewTop;
-            private final int mFirstViewLeft;
-
-
-            public SavedState(int firstViewPosition, int firstViewTop, int firstViewLeft) {
-                mFirstViewPosition = firstViewPosition;
-                mFirstViewTop = firstViewTop;
-                mFirstViewLeft = firstViewLeft;
-            }
-
-            @Override
-            public int describeContents() {
-                return 0;
-            }
-
-            @Override
-            public void writeToParcel(Parcel dest, int flags) {
-                dest.writeInt(this.mFirstViewPosition);
-                dest.writeInt(this.mFirstViewTop);
-                dest.writeInt(this.mFirstViewLeft);
-            }
-
-            protected SavedState(Parcel in) {
-                this.mFirstViewPosition = in.readInt();
-                this.mFirstViewTop = in.readInt();
-                this.mFirstViewLeft = in.readInt();
-            }
-
-            public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
-                @Override
-                public SavedState createFromParcel(Parcel source) {
-                    return new SavedState(source);
-                }
-
-                @Override
-                public SavedState[] newArray(int size) {
-                    return new SavedState[size];
-                }
-            };
-
-            public int getFirstViewTop() {
-                return mFirstViewTop;
-            }
-
-            public int getFirstViewLeft() {
-                return mFirstViewLeft;
-            }
-
-            public int getFirstViewPosition() {
-                return mFirstViewPosition;
-            }
-        }
-/***************************************************/
-
-/**
- * Save and restore state
- */
-
-        @Override
-        public Parcelable onSaveInstanceState() {
-            if (SHOW_LOGS) Log.v(TAG, "onSaveInstanceState");
-
-            if(getChildCount() > 0){
-
-                View firstView = getChildAt(0);
-                if (SHOW_LOGS) Log.v(TAG, "onSaveInstanceState, firstView " + firstView);
-
-                int firstViewTop = firstView.getTop();
-                int firstViewLeft = firstView.getLeft();
-                mSavedState = new SavedState(mFirstVisiblePosition, firstViewTop, firstViewLeft);
-            }
-
-
-            return mSavedState;
-        }
-
-        @Override
-        public void onRestoreInstanceState(Parcelable state) {
-            if (SHOW_LOGS) Log.v(TAG, "onRestoreInstanceState, mSavedState " + mSavedState);
-            mSavedState = (SavedState) state;
-        }
-
-/***************************************************/
-
-/**
- * Use saved state
- */
-        int viewTop;
-        int viewLeft;
-
-        if(mSavedState != null){
-            mLastVisiblePosition = mSavedState.getFirstViewPosition();
-            viewTop = mSavedState.getFirstViewTop();
-            viewLeft = mSavedState.getFirstViewLeft();
-
-            mSavedState = null;
+        if (dy > 0) {
+            // Contents are scrolling up. We can reach last item
         } else {
-            viewTop = getPaddingTop();
-            viewLeft = getPaddingLeft();
+            // Contents are scrolling down. We can reach first item
         }
-/***************************************************/
+
+        // We need to return the actual distance we scrolled.
+        return -delta;
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Handle scroll up.
+     */
+
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+
+        if (getChildCount() == 0 || dy == 0) {
+            // we cannot scroll if we don't have views
+            return 0;
+        }
+
+        View lastView = getChildAt(
+                getChildCount() - 1
+        );
+
+        int delta = 0;
+
+        if (dy > 0) {
+            // Contents are scrolling up. We can reach last item
+            delta = getDeltaScrollUp(dy, lastView);
+        } else {
+            // Contents are scrolling down. We can reach first item
+        }
+
+        // We need to return the actual distance we scrolled.
+        return -delta;
+    }
+
+    /**
+     * If Last Visible Position equals to the count of items it means that  we've reached lst item.
+     */
+    private boolean isLastItemReached() {
+        boolean isLastItemReached = mLastVisiblePosition == getItemCount() - 1;
+        return isLastItemReached;
+    }
+
+    private int getDeltaScrollUp(int dy, View lastView) {
+        int delta;
+        boolean isLastItemReached = isLastItemReached();
+        if (isLastItemReached) {
+            //If we've reached the last row, enforce limits
+            delta = getDeltaLastRowReached(dy, lastView);
+
+        } else {
+            // if last item is not reached we can scroll by full "dy"
+            // we return the oposite sign because actual move of views is in the oposite direction
+            delta = -dy;
+        }
+        return delta;
+    }
+
+
+    private int getDeltaLastRowReached(int dy/*is > 0 here*/, View lastView) {
+
+        int recyclerViewRightEdge = getWidth() - getPaddingRight();
+        int rightOffset = recyclerViewRightEdge - lastView.getRight();
+        /**
+         * if rightOffset < 0 then right edge of the view is behind the right edge of RecyclerView
+         *
+         * It's last view and because we cannot scroll more than rightOffset
+         * We get maximum of negative value of dy and the rightOffset.
+         *
+         * if (-dy) is bigger it means that we can scroll by "dy" and we still won't reach the end.
+         * if rightOffset is bigger it means that we can scroll only by rightOffset and we will reach the end
+         *
+         */
+
+        int delta = Math.max(-dy, rightOffset); // Math.min(dy, -rightOffset)
+        return delta;
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Scroll views by “delta”
+     */
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        int childCount = getChildCount();
+
+        if (getChildCount() == 0 || dy == 0) {
+            // we cannot scroll if we don't have views
+            return 0;
+        }
+
+        View firstView = getChildAt(0);
+        View lastView = getChildAt(
+                getChildCount() - 1
+        );
+
+        int delta = 0;
+
+        if (dy > 0) {
+            // Contents are scrolling up. We can reach last item
+            delta = getDeltaScrollUp(dy, lastView);
+        } else {
+            // Contents are scrolling down. We can reach first item
+        }
+
+        /** Scroll views by “delta” */
+        scrollViewsByDelta(childCount, delta);
+        // We need to return the actual distance we scrolled.
+        return -delta;
+    }
+
+    private void scrollViewsByDelta(int childCount, int delta) {
+        for (int indexOfView = 0; indexOfView < childCount; indexOfView++) {
+            View view = getChildAt(indexOfView);
+            view.offsetTopAndBottom(delta);
+            view.offsetLeftAndRight(delta);
+        }
+    }
+
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Scroll views by “delta”
+     */
+
+    private int mFirstVisiblePosition;
+
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        int childCount = getChildCount();
+
+        if (getChildCount() == 0 || dy == 0) {
+            // we cannot scroll if we don't have views
+            return 0;
+        }
+
+        View firstView = getChildAt(0);
+        View lastView = getChildAt(
+                getChildCount() - 1
+        );
+
+        int delta = 0;
+
+        if (dy > 0) {
+            // Contents are scrolling up. We can reach last item
+            delta = getDeltaScrollUp(dy, lastView);
+        } else {
+            // Contents are scrolling down. We can reach first item
+        }
+
+        /** Scroll views by “delta” */
+        scrollViewsByDelta(childCount, delta);
+
+        performRecycling(recycler, firstView, lastView, delta);
+
+        // We need to return the actual distance we scrolled.
+        return -delta;
+    }
+
+
+    private void performRecycling(RecyclerView.Recycler recycler, View firstView, View lastView, int delta) {
+        /** perform recycling*/
+        if (delta < 0) {
+            /** Content is scrolling up*/
+            recycleTopIfNeeded(firstView, recycler);
+            addToBottomIfNeeded(lastView, recycler);
+
+        } else {
+            /** Content is scrolling down*/
+        }
+        /** perform recycling*/
+    }
+
+
+    private void recycleTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
+        int recyclerViewLeftEdge = getPaddingLeft();
+
+        boolean needRecycling = firstView.getRight() < recyclerViewLeftEdge;
+
+        if (needRecycling) {
+            // first view is hidden
+
+            removeView(firstView);
+            mFirstVisiblePosition++;
+            recycler.recycleView(firstView);
+        }
+    }
+
+    /**
+     * Add View to bottom if needed
+     */
+    private void addToBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
+
+        int recyclerViewRightEdge = getWidth() - getPaddingRight();
+
+        int leftOffset = lastView.getLeft() ;
+
+        boolean leftEdgeIsVisible = leftOffset < recyclerViewRightEdge;
+
+        if (leftEdgeIsVisible) {
+
+            int itemCount = getItemCount();
+            int nextPosition = mLastVisiblePosition + 1;
+
+            boolean hasNextView = nextPosition < itemCount;
+
+            if (hasNextView) {
+
+                View newLastView = recycler.getViewForPosition(nextPosition);
+
+                addView(newLastView);
+                measureChildWithMargins(newLastView, 0, 0);
+
+                int measuredWidth = getDecoratedMeasuredWidth(newLastView);
+                int measuredHeight = getDecoratedMeasuredHeight(newLastView);
+
+                int viewTop = lastView.getBottom();
+                int viewLeft = lastView.getLeft() + mStepSize;
+
+                layoutDecorated(newLastView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
+
+                mLastVisiblePosition++;
+            } else {
+                // last view is the last item. Do nothing
+            }
+        }
+    }
+    /**********************************************************************************************
+     **********************************************************************************************
+     ***********************************************************************************************
+     **********************************************************************************************/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Repeat the same thing for scroll Down
+     */
+    @Override
+    public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
+        int childCount = getChildCount();
+
+        if (getChildCount() == 0 || dy == 0) {
+            // we cannot scroll if we don't have views
+            return 0;
+        }
+
+        View firstView = getChildAt(0);
+        View lastView = getChildAt(
+                getChildCount() - 1
+        );
+
+        /** scroll views*/
+        int delta;
+
+        if (dy > 0) { // Content is scrolling up
+            delta = getDeltaScrollUp(dy, lastView);
+
+        } else { // Content is scrolling down
+            delta = getDeltaScrollDown(dy, firstView);
+        }
+
+        scrollViewsByDelta(childCount, delta);
+
+        performRecycling(recycler, firstView, lastView, delta);
+
+        return -delta;
+    }
+
+    private void performRecycling(RecyclerView.Recycler recycler, View firstView, View lastView, int delta) {
+        /** perform recycling*/
+        if (delta < 0) {
+            /** Content is scrolling up*/
+            recycleTopIfNeeded(firstView, recycler);
+            addToBottomIfNeeded(lastView, recycler);
+
+        } else {
+            /** Content is scrolling down*/
+            recycleBottomIfNeeded(lastView, recycler);
+            addTopIfNeeded(firstView, recycler);
+        }
+        /** perform recycling*/
+    }
+
+    /**
+     * If Last Visible Position equals to the count of items it means that  we've reached lst item.
+     */
+    private boolean isLastItemReached() {
+        boolean isLastItemReached = mLastVisiblePosition == getItemCount() - 1;
+        return isLastItemReached;
+    }
+
+    private int getDeltaScrollUp(int dy, View lastView) {
+        int delta;
+        boolean isLastItemReached = isLastItemReached();
+        if (isLastItemReached) {
+            //If we've reached the last row, enforce limits
+            delta = getDeltaLastRowReached(dy, lastView);
+
+        } else {
+            // if last item is not reached we can scroll by full "dy"
+            delta = -dy;
+        }
+        return delta;
+    }
+
+    private int getDeltaScrollDown(int dy, View firstView) {
+        int delta;//Check against top bound
+        int leftOffset = firstView.getLeft();
+        boolean isFirstItemReached = isFirstItemReached();
+
+        if (isFirstItemReached) {
+            delta = -Math.max(dy, leftOffset);
+        } else {
+            delta = -dy;
+        }
+        return delta;
+    }
+
+    private boolean isFirstItemReached() {
+        boolean isFirstItemReached = mFirstVisiblePosition == 0;
+        return isFirstItemReached;
+    }
+
+    private void addTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
+        int leftOffset = firstView.getLeft();
+        if (leftOffset >= 0) {
+
+            if (mFirstVisiblePosition > 0) {
+                View newFirstView = recycler.getViewForPosition(mFirstVisiblePosition - 1);
+
+                addView(newFirstView, 0);
+                measureChildWithMargins(newFirstView, 0, 0);
+
+                int measuredWidth = getDecoratedMeasuredWidth(newFirstView);
+                int measuredHeight = getDecoratedMeasuredHeight(newFirstView);
+
+                int viewLeft = firstView.getLeft() - mStepSize;
+                int viewTop = firstView.getTop() - measuredHeight;
+
+                layoutDecorated(newFirstView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
+                mFirstVisiblePosition--;
+            } else {
+                // this is first view there is no views to add to the top
+            }
+        }
+    }
+
+    private void recycleBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
+        /**
+         * Scroll up. Finger is pulling down
+         * This mean that view that goes to bottom-right direction might hide.
+         * If view is hidden we will recycle it
+         */
+
+        int recyclerViewHeight = getHeight();
+
+        int lastViewLeft = lastView.getLeft();
+
+        int rightEdge = getWidth() - getPaddingRight();
+
+        if (lastViewLeft > rightEdge) {
+            removeView(lastView);
+            mLastVisiblePosition--;
+            recycler.recycleView(lastView);
+        }
+    }
+
+    private void recycleTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {
+        int recyclerViewLeftEdge = getPaddingLeft();
+
+        boolean needRecycling = firstView.getRight() < recyclerViewLeftEdge;
+
+        if (needRecycling) {
+            // first view is hidden
+
+            removeView(firstView);
+            mFirstVisiblePosition++;
+            recycler.recycleView(firstView);
+        }
+    }
+
+    /**
+     * Add View to bottom if needed
+     */
+    private void addToBottomIfNeeded(View lastView, RecyclerView.Recycler recycler) {
+
+        int recyclerViewRightEdge = getWidth() - getPaddingRight();
+
+        int leftOffset = lastView.getLeft() ;
+
+        boolean leftEdgeIsVisible = leftOffset < recyclerViewRightEdge;
+
+        if (leftEdgeIsVisible) {
+
+            int itemCount = getItemCount();
+            int nextPosition = mLastVisiblePosition + 1;
+
+            boolean hasNextView = nextPosition < itemCount;
+
+            if (hasNextView) {
+
+                View newLastView = recycler.getViewForPosition(nextPosition);
+
+                addView(newLastView);
+                measureChildWithMargins(newLastView, 0, 0);
+
+                int measuredWidth = getDecoratedMeasuredWidth(newLastView);
+                int measuredHeight = getDecoratedMeasuredHeight(newLastView);
+
+                int viewTop = lastView.getBottom();
+                int viewLeft = lastView.getLeft() + mStepSize;
+
+                layoutDecorated(newLastView, viewLeft, viewTop, viewLeft + measuredWidth, viewTop + measuredHeight);
+
+                mLastVisiblePosition++;
+            } else {
+                // last view is the last item. Do nothing
+            }
+        }
+    }
+
+    private void scrollViewsByDelta(int childCount, int delta) {
+        for (int indexOfView = 0; indexOfView < childCount; indexOfView++) {
+            View view = getChildAt(indexOfView);
+            view.offsetTopAndBottom(delta);
+            view.offsetLeftAndRight(delta);
+        }
+    }
+
+    private int getDeltaLastRowReached(int dy, View lastView) {
+
+        int recyclerViewRightEdge = getWidth() - getPaddingRight();
+        int rightOffset = recyclerViewRightEdge - lastView.getRight();
+        /**
+         * if rightOffset < 0 then right edge of the view is behind the right edge of RecyclerView
+         *
+         * It's last view and because we cannot scroll more than rightOffset
+         * We get maximum of negative value of dy and the rightOffset.
+         *
+         * if (-dy) is bigger it means that we can scroll by "dy" and we still won't reach the end.
+         * if rightOffset is bigger it means that we can scroll only by rightOffset and we will reach the end
+         *
+         */
+
+        int delta = Math.max(-dy, rightOffset);
+        return delta;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * TODO:
+     * Handle save state
+     */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
