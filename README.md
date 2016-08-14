@@ -1,9 +1,26 @@
 # DiagonalLayoutManager
-The layout manager that lays out views from top-left to bottom-right
+The layout manager that lays out views from top-left to bottom-right.
 
-This layout manager was created for presentation purposes. It is simple. And it doesn't handle few things:
+# Not handled
 - Predictive animations
-- Add / remove elements from initial list.
+- Dynamic add/remove elements from initial list.
+
+# Usage
+Add this snippet to your project build.gradle file:
+```
+buildscript {
+    repositories {
+        jcenter()
+    }
+}
+```
+
+# Usage of DiagonalLayoutManager
+```
+dependencies {
+    compile 'com.github.danylovolokh:diagonal-layout-manager:0.1.0'
+}
+```
 
 #Demo
 
