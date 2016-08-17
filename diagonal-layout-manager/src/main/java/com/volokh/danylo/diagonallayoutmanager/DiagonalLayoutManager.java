@@ -183,10 +183,11 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
                 int recyclerViewRightEdge = getWidth() - getPaddingRight();
 
                 int rightOffset = recyclerViewRightEdge - lastView.getRight();
-                delta = Math.max(-dy, rightOffset);
+
+                delta = Math.min(dy, -rightOffset);
             } else {
 
-                delta = -dy;
+                delta = dy;
             }
         } else { // Contents are scrolling down
             //Check against top bound
@@ -197,23 +198,24 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
             }
 
             if (isFirstItemReached) {
-                delta = -Math.max(dy, leftOffset);
+                // dy is < 0
+                delta = Math.max(dy, leftOffset);
             } else {
-                delta = -dy;
+                delta = dy;
             }
         }
 
         for (int indexOfView = 0; indexOfView < childCount; indexOfView++) {
             View view = getChildAt(indexOfView);
 
-            view.offsetTopAndBottom(delta);
-            view.offsetLeftAndRight(delta);
+            view.offsetTopAndBottom(-delta);
+            view.offsetLeftAndRight(-delta);
         }
         /** scroll views*/
 
         if(SHOW_LOGS) Log.v(TAG, "scrollVerticallyBy, delta " + delta);
         /** perform recycling*/
-        if (delta < 0) {
+        if (delta > 0) {
             /** Scroll down*/
             recycleTopIfNeeded(firstView, recycler);
             addToBottomIfNeeded(lastView, recycler);
@@ -225,7 +227,7 @@ public class DiagonalLayoutManager extends RecyclerView.LayoutManager {
         }
         /** perform recycling*/
 
-        return -delta;
+        return delta;
     }
 
     private void addTopIfNeeded(View firstView, RecyclerView.Recycler recycler) {

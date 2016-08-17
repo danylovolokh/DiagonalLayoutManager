@@ -399,7 +399,7 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
         }
 
         // We need to return the actual distance we scrolled.
-        return -delta;
+        return delta;
     }
     /**********************************************************************************************
      **********************************************************************************************
@@ -464,7 +464,7 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
         }
 
         // We need to return the actual distance we scrolled.
-        return -delta;
+        return delta;
     }
 
     /**
@@ -485,7 +485,7 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
         } else {
             // if last item is not reached we can scroll by full "dy"
             // we return the oposite sign because actual move of views is in the oposite direction
-            delta = -dy;
+            delta = dy;
         }
         return delta;
     }
@@ -506,7 +506,7 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
          *
          */
 
-        int delta = Math.max(-dy, rightOffset); // Math.min(dy, -rightOffset)
+        int delta = Math.min(dy, -rightOffset); // Math.min(dy, -rightOffset)
         return delta;
     }
     /**********************************************************************************************
@@ -574,14 +574,14 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
         /** Scroll views by “delta” */
         scrollViewsByDelta(childCount, delta);
         // We need to return the actual distance we scrolled.
-        return -delta;
+        return delta;
     }
 
     private void scrollViewsByDelta(int childCount, int delta) {
         for (int indexOfView = 0; indexOfView < childCount; indexOfView++) {
             View view = getChildAt(indexOfView);
-            view.offsetTopAndBottom(delta);
-            view.offsetLeftAndRight(delta);
+            view.offsetTopAndBottom(-delta);
+            view.offsetLeftAndRight(-delta);
         }
     }
 
@@ -658,13 +658,13 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
         performRecycling(recycler, firstView, lastView, delta);
 
         // We need to return the actual distance we scrolled.
-        return -delta;
+        return delta;
     }
 
 
     private void performRecycling(RecyclerView.Recycler recycler, View firstView, View lastView, int delta) {
         /** perform recycling*/
-        if (delta < 0) {
+        if (delta > 0) {
             /** Content is scrolling up*/
             recycleTopIfNeeded(firstView, recycler);
             addToBottomIfNeeded(lastView, recycler);
@@ -796,12 +796,12 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
 
         performRecycling(recycler, firstView, lastView, delta);
 
-        return -delta;
+        return delta;
     }
 
     private void performRecycling(RecyclerView.Recycler recycler, View firstView, View lastView, int delta) {
         /** perform recycling*/
-        if (delta < 0) {
+        if (delta > 0) {
             /** Content is scrolling up*/
             recycleTopIfNeeded(firstView, recycler);
             addToBottomIfNeeded(lastView, recycler);
@@ -831,7 +831,7 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
 
         } else {
             // if last item is not reached we can scroll by full "dy"
-            delta = -dy;
+            delta = dy;
         }
         return delta;
     }
@@ -842,9 +842,9 @@ public class PresentationGuide extends RecyclerView.LayoutManager{
         boolean isFirstItemReached = isFirstItemReached();
 
         if (isFirstItemReached) {
-            delta = -Math.max(dy, leftOffset);
+            delta = Math.max(dy, leftOffset);
         } else {
-            delta = -dy;
+            delta = dy;
         }
         return delta;
     }
